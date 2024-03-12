@@ -1,0 +1,17 @@
+# do DPO preference-based training
+name: dpo
+
+# the temperature parameter for DPO; lower values mean we care less about
+#   the reference model
+beta: ???
+
+# if true, use a uniform (maximum entropy) reference model
+reference_free: false
+
+is_online: false
+
+temp: 1.1
+
+adjust_temp: true
+
+repeat_num: 4
