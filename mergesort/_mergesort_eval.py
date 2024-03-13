@@ -11,12 +11,6 @@ import re
 import argparse
 import json
 
-def generate():
-    pass
-
-def recursive_generate():
-    pass
-
 def init_model(lora_dir):
     model = AutoModelForCausalLM.from_pretrained('huggyllama/llama-7b',cache_dir='/scratch/kyle/LLMDivideAndConquer/cache/kylemontgomery', torch_dtype=torch.float16, device_map='auto')
     model = PeftModel.from_pretrained(model, lora_dir)
