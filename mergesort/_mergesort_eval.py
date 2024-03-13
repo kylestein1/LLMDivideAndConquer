@@ -1,16 +1,13 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from peft import PeftModel, PeftConfig
-import datasets
-import matplotlib.pyplot as plt
-import random
+from peft import PeftModel
 from tqdm import tqdm
-import itertools
 import ast
 import re
 import argparse
 import json
 import math
+import os
 
 def init_model(lora_dir):
     model = AutoModelForCausalLM.from_pretrained('huggyllama/llama-7b',cache_dir='/scratch/kyle/LLMDivideAndConquer/cache', torch_dtype=torch.float16, device_map='auto')
@@ -56,6 +53,15 @@ def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
 def parse_last_list(s):
     matches =  re.findall(r'\[[^\]]*\]', s)
     return matches[-1] if matches else None
+
+def check_correct(pred, gold):
+    try:
+        if ast.literal_eval(pred) == ast.literal_eval(gold):
+            return True
+    except:
+        if pred == gold:
+            return True
+        
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -70,25 +76,31 @@ if __name__ == "__main__":
         data = json.load(f)
     
     if args.style == "baseline" or args.style == "scratchpad":
-        for i in data.keys():
+        for i in tqdm(data.keys()):
             count = 0
             for j in range(len(data[i])):
-                pred = generate(model, tokenizer, f"{data[i][j]['input']}", 2048).split("=")[-1].strip().rstrip()
-                gold = data[i][j]['output']
-                if pred == gold:
-                    count += 1
+                pred = generate(model, tokenizer, f"{data[i][j]['input']}", 2048)
+                correct = check_correct(parse_last_list(pred), data[i][j]['output'])
+                count += 1 if correct else 0
+                data[i][j]['correct'] = correct
+                data[i][j]['pred_logs'] = " ".join(pred.split())
             print(f"Num Correct length {i} elements: {count}")
+            data[i]['num_correct'] = count
             
     elif args.style == "recursive":
-        for i in data.keys():
+        for i in tqdm(data.keys()):
             count = 0
             for j in range(len(data[i])):
                 pred, logs = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
-                print(logs)
-                gold = data[i][j]['output']
-                if pred == gold:
-                    count += 1
+                correct = check_correct(parse_last_list(pred), data[i][j]['output'])
+                count += 1 if correct else 0
+                data[i][j]['correct'] = correct
+                data[i][j]['pred_logs'] = " ".join(pred.split())
             print(f"Num Correct length {i} elements: {count}")
+            data[i]['num_correct'] = count
+    
+    with open(os.path.join(args.lora_dir, f"mergesort_{args.split}_{args.style}_pred.json"), 'w') as f:
+        json.dump(data, f, indent=4)
     
     
     
