@@ -43,7 +43,7 @@ def get_local_dir(prefixes_to_resolve: List[str]) -> str:
     #     if os.path.exists(prefix):
     #         return f"{prefix}/{getpass.getuser()}"
     # os.makedirs(prefix)
-    return f"/scratch/kyle/Recursive-Inference/cache"
+    return f"/scratch/kyle/LLMDivideAndConquer/cache"
     
 
 def get_local_run_dir(exp_name: str, local_dirs: List[str]) -> str:

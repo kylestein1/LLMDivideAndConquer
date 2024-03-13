@@ -75,7 +75,7 @@ def generate_random_array(length, min_val, max_val):
 def generate_training_data(style):
     data = []
     for i in range(1, 16):
-        for j in range(1000):
+        for j in range(5000):
             arr = generate_random_array(i, -50, 50)
             sorted_arr, recursive_logs = merge_sort_recursive(arr)
             _, scratchpad_logs = merge_sort_scratchpad(arr)
@@ -110,7 +110,7 @@ def generate_training_data(style):
                 raise ValueError(f"Invalid style: {style}")
 
     random.shuffle(data)
-    with open(f"data/mergesort/mergesort_train_{style}.json", "w") as f:
+    with open(f"mergesort/mergesort_train_{style}.json", "w") as f:
         json.dump(data, f, indent=4)
 
 def generate_testing_data(split, style):
@@ -142,7 +142,7 @@ def generate_testing_data(split, style):
             else: 
                 raise ValueError(f"Invalid style: {style}")
             
-    with open(f"data/mergesort/mergesort_{split}_{style}.json", "w") as f:
+    with open(f"mergesort/mergesort_{split}_{style}.json", "w") as f:
         json.dump(data, f, indent=4)
         
 if __name__ == "__main__":
