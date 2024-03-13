@@ -36,19 +36,20 @@ def generate(model, tokenizer, prompt, max_length):
     return generated_text
 
 
-def recursive_generate(model, tokenizer, prompt, max_length, max_depth, logs = []):
+def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
+    logs = []
     if max_depth == 0:
         raise ValueError("Max depth reached")
     output = generate(model, tokenizer, prompt, max_length)
     sort_matches = re.findall(r'sort\(\[[^\]]+\]\)', output)
     if len(sort_matches)<2:
-        logs.append(output)
-        return output, logs
+        return output, [output]
     for match in sort_matches[1:]:
-        sorted_result = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
+        sorted_result, child_logs = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
         output = output.replace(match, parse_last_list(sorted_result))
+        logs.extend(child_logs)
     output = generate(model, tokenizer, f"{output} = ", max_length)
-    logs.append(output)
+    logs.extend([output])
     return output, logs
 
 
@@ -82,7 +83,8 @@ if __name__ == "__main__":
         for i in data.keys():
             count = 0
             for j in range(len(data[i])):
-                pred = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)[0].split("=")[-1].strip().rstrip()
+                pred, logs = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
+                print(logs)
                 gold = data[i][j]['output']
                 if pred == gold:
                     count += 1
