@@ -115,7 +115,7 @@ def generate_training_data(style):
 
 def generate_testing_data(split, style):
     data = {}
-    for i in [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]:
+    for i in [1, 5, 10, 15, 20, 25, 30]:
         data[i] = []
         for j in range(25 if split == 'test' else 5):
             arr = generate_random_array(i, -50, 50)
