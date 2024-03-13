@@ -15,9 +15,9 @@ def merge_sort_recursive(arr):
     right_half, right_logs = merge_sort_recursive(arr[mid:])
     
     merged_array = merge_recursive(left_half, right_half)
-    current_log = [f"sort({arr}) = merge(sort({arr[:mid]}), sort({arr[mid:]})) = {merged_array}"]
+    current_log = [f"sort({arr}) = merge({left_half}, {right_half}) = {merged_array}"]
 
-    return merged_array, current_log + left_logs + right_logs
+    return merged_array, left_logs + right_logs + current_log
 
 def merge_recursive(left, right):
     sorted_array = []

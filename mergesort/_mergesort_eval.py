@@ -36,20 +36,20 @@ def generate(model, tokenizer, prompt, max_length):
     return generated_text
 
 
-def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
+def recursive_generate(model, tokenizer, prompt, max_length, max_depth, logs = []):
     if max_depth == 0:
         raise ValueError("Max depth reached")
     output = generate(model, tokenizer, prompt, max_length)
     sort_matches = re.findall(r'sort\(\[[^\]]+\]\)', output)
     if len(sort_matches)<2:
-        print(output)
-        return output
+        logs.append(output)
+        return output, logs
     for match in sort_matches[1:]:
         sorted_result = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
         output = output.replace(match, parse_last_list(sorted_result))
     output = generate(model, tokenizer, f"{output} = ", max_length)
-    print(output)
-    return output
+    logs.append(output)
+    return output, logs
 
 
 def parse_last_list(s):
