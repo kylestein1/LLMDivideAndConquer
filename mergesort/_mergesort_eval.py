@@ -61,6 +61,7 @@ def check_correct(pred, gold):
     except:
         if pred == gold:
             return True
+    return False
         
         
 if __name__ == "__main__":
@@ -76,28 +77,32 @@ if __name__ == "__main__":
         data = json.load(f)
     
     if args.style == "baseline" or args.style == "scratchpad":
-        for i in tqdm(data.keys()):
+        for i in data.keys():
             count = 0
-            for j in range(len(data[i])):
+            for j in tqdm(range(len(data[i]))):
                 pred = generate(model, tokenizer, f"{data[i][j]['input']}", 2048)
                 correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                 count += 1 if correct else 0
                 data[i][j]['correct'] = correct
                 data[i][j]['pred_logs'] = " ".join(pred.split())
-            print(f"Num Correct length {i} elements: {count}")
-            data[i]['num_correct'] = count
+            print(f"[LENGTH {i}] Num Correct: {count}")
             
     elif args.style == "recursive":
-        for i in tqdm(data.keys()):
+        for i in data.keys():
             count = 0
-            for j in range(len(data[i])):
-                pred, logs = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
+            for j in tqdm(range(len(data[i]))):
+                try:
+                    pred, logs = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
+                except:
+                    data[i][j]['correct'] = False
+                    data[i][j]['pred_logs'] = "Max depth reached"
+                    continue
+
                 correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                 count += 1 if correct else 0
                 data[i][j]['correct'] = correct
                 data[i][j]['pred_logs'] = " ".join(pred.split())
-            print(f"Num Correct length {i} elements: {count}")
-            data[i]['num_correct'] = count
+            print(f"[LENGTH {i}] Num Correct: {count}")
     
     with open(os.path.join(args.lora_dir, f"mergesort_{args.split}_{args.style}_pred.json"), 'w') as f:
         json.dump(data, f, indent=4)
