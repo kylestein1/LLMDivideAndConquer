@@ -32,23 +32,21 @@ def generate(model, tokenizer, prompt, max_length):
     generated_text = tokenizer.batch_decode(tokenized_samples,skip_special_tokens=True)[0]
     return generated_text
 
-
 def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
-    logs = []
     if max_depth == 0:
         raise ValueError("Max depth reached")
+    if prompt in cache:
+        return cache[prompt]
     output = generate(model, tokenizer, prompt, max_length)
     sort_matches = re.findall(r'sort\(\[[^\]]+\]\)', output)
     if len(sort_matches)<2:
-        return output, [output]
-    for match in sort_matches[1:]:
-        sorted_result, child_logs = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
+        return output # hopefully this never hits
+    for match in sort_matches[1:]:    
+        sorted_result = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
         output = output.replace(match, parse_last_list(sorted_result))
-        logs.extend(child_logs)
     output = generate(model, tokenizer, f"{output} = ", max_length)
-    logs.extend([output])
-    return output, logs
-
+    cache[prompt] = output
+    return output
 
 def parse_last_list(s):
     matches =  re.findall(r'\[[^\]]*\]', s)
@@ -72,7 +70,11 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoints", nargs='+', type=str)
     args = parser.parse_args()
     
+    global cache
+    
     for checkpoint in args.checkpoints:
+        
+        cache = {}
 
         model, tokenizer = init_model(os.path.join(args.lora_dir, checkpoint))
         

@@ -36,37 +36,79 @@ def merge_recursive(left, right):
 
     return sorted_array
 
-def merge_sort_scratchpad(arr):
-    if len(arr) <= 1:
-        return arr, f"[{', '.join(map(str, arr))}]"
+# def merge_sort_scratchpad(arr):
+#     if len(arr) <= 1:
+#         return arr, f"[{', '.join(map(str, arr))}]"
     
-    mid = len(arr) // 2
-    left_part, left_str = merge_sort_scratchpad(arr[:mid])
-    right_part, right_str = merge_sort_scratchpad(arr[mid:])
+#     mid = len(arr) // 2
+#     left_part, left_str = merge_sort_scratchpad(arr[:mid])
+#     right_part, right_str = merge_sort_scratchpad(arr[mid:])
     
-    merged, merge_str = merge_scratchpad(left_part, right_part)
+#     merged, merge_str = merge_scratchpad(left_part, right_part)
     
-    output_str = f"merge(sort({left_str}), sort({right_str})) = {merge_str}"
+#     output_str = f"merge(sort({left_str}), sort({right_str})) = {merge_str}"
     
-    return merged, output_str
+#     return merged, output_str
 
-def merge_scratchpad(left, right):
-    result = []
-    left_index, right_index = 0, 0
-    merge_str = f"merge([{', '.join(map(str, left))}], [{', '.join(map(str, right))}])"
+# def merge_scratchpad(left, right):
+#     result = []
+#     left_index, right_index = 0, 0
+#     merge_str = f"merge([{', '.join(map(str, left))}], [{', '.join(map(str, right))}])"
     
-    while left_index < len(left) and right_index < len(right):
-        if left[left_index] < right[right_index]:
-            result.append(left[left_index])
-            left_index += 1
-        else:
-            result.append(right[right_index])
-            right_index += 1
+#     while left_index < len(left) and right_index < len(right):
+#         if left[left_index] < right[right_index]:
+#             result.append(left[left_index])
+#             left_index += 1
+#         else:
+#             result.append(right[right_index])
+#             right_index += 1
     
-    result += left[left_index:]
-    result += right[right_index:]
+#     result += left[left_index:]
+#     result += right[right_index:]
     
-    return result, f"{merge_str} = [{', '.join(map(str, result))}]"
+    # return result, f"{merge_str} = [{', '.join(map(str, result))}]"
+
+def merge_sort_scratchpad(arr, level=0, side='start'):
+    log_steps = []
+    if len(arr) > 1:
+        log_steps.append(f"{'  '*level}[{side}] Splitting: {arr}")
+        mid = len(arr) // 2
+        L = arr[:mid]
+        R = arr[mid:]
+
+        # Merge sort the two halves and collect their logs
+        sorted_L, log_L = merge_sort_scratchpad(L, level + 1, 'left')
+        sorted_R, log_R = merge_sort_scratchpad(R, level + 1, 'right')
+        
+        # Combine the logs from left and right halves
+        log_steps += log_L + log_R
+
+        # Merging the sorted halves
+        i = j = k = 0
+        while i < len(sorted_L) and j < len(sorted_R):
+            if sorted_L[i] < sorted_R[j]:
+                arr[k] = sorted_L[i]
+                i += 1
+            else:
+                arr[k] = sorted_R[j]
+                j += 1
+            k += 1
+
+        while i < len(sorted_L):
+            arr[k] = sorted_L[i]
+            i += 1
+            k += 1
+
+        while j < len(sorted_R):
+            arr[k] = sorted_R[j]
+            j += 1
+            k += 1
+        
+        log_steps.append(f"{'  '*level}[{side}] Merging: {arr}")
+    else:
+        log_steps.append(f"{'  '*level}[{side}] Base case: {arr}")
+    
+    return arr, log_steps
 
 
 def generate_random_array(length, min_val, max_val):
@@ -76,7 +118,7 @@ def generate_training_data(style):
     data = []
     for i in range(1, 16):
         for j in range(5000):
-            arr = generate_random_array(i, -50, 50)
+            arr = generate_random_array(i, 0, 100)
             sorted_arr, recursive_logs = merge_sort_recursive(arr)
             _, scratchpad_logs = merge_sort_scratchpad(arr)
             if i == 1:
@@ -98,8 +140,7 @@ def generate_training_data(style):
             elif style == "scratchpad":
                 data.append({
                     "input": f"sort({arr}) = ",
-                    "output": f"{scratchpad_logs}"
-                
+                    "output": "\n".join(scratchpad_logs) 
                 })
             elif style == "baseline":
                 data.append({
