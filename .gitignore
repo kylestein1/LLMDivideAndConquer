@@ -3,3 +3,4 @@ cache/
 exe/
 outputs/
 pytorch:23.06-py3-recursive.sif
+*.json

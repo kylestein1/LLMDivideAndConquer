@@ -43,7 +43,7 @@ def exponentiation_by_squaring_scratchpad(base, exponent, level=0, side='start')
 def generate_training_data(style):
     data = []
     for base in range(2, 11):
-        for exponent in range(0, 16):
+        for exponent in range(0, 9):
             for _ in range(100):
                 result, recursive_logs = exponentiation_by_squaring_recursive(base, exponent)
                 _, scratchpad_logs = exponentiation_by_squaring_scratchpad(base, exponent)
@@ -52,12 +52,30 @@ def generate_training_data(style):
                         "input": f"{base}^{exponent} = ",
                         "output": "1"
                     })
-                elif style == "recursive":
+                elif exponent == 1:
                     data.append({
                         "input": f"{base}^{exponent} = ",
-                        "output": f"{result}",
-                        "logs": recursive_logs
+                        "output": f"{base}"
                     })
+                elif style == "recursive":
+                    if exponent % 2 == 0:
+                        data.append({
+                            "input": f"{base}^{exponent} = ",
+                            "output": f"{base}^{exponent // 2} * {base}^{exponent // 2}"
+                        })
+                        data.append({
+                            "input": f"{base}^{exponent} = {base**(exponent // 2)} * {base**(exponent // 2)} = ",
+                            "output": f"{result}",
+                        })
+                    else:
+                        data.append({
+                            "input": f"{base}^{exponent} = ",
+                            "output": f"{base} * {base}^{(exponent - 1) // 2} * {base}^{(exponent - 1) // 2}"
+                        })
+                        data.append({
+                            "input": f"{base}^{exponent} = {base} * {base**((exponent-1) // 2)} * {base**((exponent-1) // 2)} = ",
+                            "output": f"{result}",
+                        })
                 elif style == "scratchpad":
                     data.append({
                         "input": f"{base}^{exponent} = ",

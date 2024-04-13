@@ -118,7 +118,7 @@ def generate_training_data(style):
     data = []
     for i in range(1, 16):
         for j in range(5000):
-            arr = generate_random_array(i, 0, 100)
+            arr = generate_random_array(i, 1, 1000)
             sorted_arr, recursive_logs = merge_sort_recursive(arr)
             _, scratchpad_logs = merge_sort_scratchpad(arr)
             if i == 1:
@@ -159,7 +159,7 @@ def generate_testing_data(split, style):
     for i in [1, 5, 10, 15, 20, 25, 30]:
         data[i] = []
         for j in range(25 if split == 'test' else 5):
-            arr = generate_random_array(i, -50, 50)
+            arr = generate_random_array(i, 1, 1000)
             sorted_arr, recursive_logs = merge_sort_recursive(arr)
             _, scratchpad_logs = merge_sort_scratchpad(arr)
             if style == "recursive":
