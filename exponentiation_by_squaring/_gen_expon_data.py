@@ -95,7 +95,7 @@ def generate_training_data(style):
 
 def generate_testing_data(split, style):
     data = {}
-    for exponent in [0, 5, 10, 15, 20, 25, 30]:
+    for exponent in [0, 3, 6, 9, 12, 15, 18, 21]:
         data[exponent] = []
         for _ in range(25 if split == 'test' else 5):
             base = random.randint(2, 10)

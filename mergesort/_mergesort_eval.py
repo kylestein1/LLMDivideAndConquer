@@ -73,10 +73,9 @@ if __name__ == "__main__":
     global cache
     
     for checkpoint in args.checkpoints:
+        model, tokenizer = init_model(os.path.join(args.lora_dir, checkpoint))
         
         cache = {}
-
-        model, tokenizer = init_model(os.path.join(args.lora_dir, checkpoint))
         
         with open(f"mergesort/mergesort_{args.split}_{args.style}.json", 'r') as f:
             data = json.load(f)
@@ -89,7 +88,7 @@ if __name__ == "__main__":
                     correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                     count += 1 if correct else 0
                     data[i][j]['correct'] = correct
-                    data[i][j]['pred_logs'] = " ".join(pred.split())
+                    data[i][j]['pred'] = " ".join(pred.split())
                 print(f"[LENGTH {i}] Num Correct: {count}")
                 
         elif args.style == "recursive":
@@ -97,7 +96,7 @@ if __name__ == "__main__":
                 count = 0
                 for j in range(len(data[i])):
                     try:
-                        pred, logs = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
+                        pred = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
                     except:
                         data[i][j]['correct'] = False
                         data[i][j]['pred_logs'] = "Max depth reached"
@@ -106,7 +105,7 @@ if __name__ == "__main__":
                     correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                     count += 1 if correct else 0
                     data[i][j]['correct'] = correct
-                    data[i][j]['pred_logs'] = " ".join(pred.split())
+                    data[i][j]['pred'] = " ".join(pred.split())
                 print(f"[LENGTH {i}] Num Correct: {count}")
         
         with open(os.path.join(args.lora_dir, checkpoint, f"mergesort_{args.split}_{args.style}_pred.json"), 'w') as f:
