@@ -95,7 +95,11 @@ if __name__ == "__main__":
                 count = 0
                 for sample in data[exponent]:
                     try:
-                        pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, 1 if exponent == 0 else math.ceil(math.log2(int(exponent))) + 1)
+                        if exponent == 0:
+                            max_depth = 1
+                        else:
+                            max_depth = math.ceil(math.log2(int(exponent))) + 1
+                        pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, max_depth)
                     except Exception as e:
                         print('Error:', e)
                         sample['correct'] = False
