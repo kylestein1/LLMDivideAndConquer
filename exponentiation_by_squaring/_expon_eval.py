@@ -58,8 +58,8 @@ def check_correct(pred, gold):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--split", type=str, choices=['train', 'test'])
-    parser.add_argument("--style", type=str, choices=['recursive', 'scratchpad', 'baseline'])
+    parser.add_argument("--split", type=str)
+    parser.add_argument("--style", type=str)
     parser.add_argument("--lora-dir", type=str)
     parser.add_argument("--checkpoints", nargs='+', type=str)
     args = parser.parse_args()
