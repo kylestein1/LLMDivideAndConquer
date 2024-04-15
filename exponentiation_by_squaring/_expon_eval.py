@@ -94,7 +94,7 @@ if __name__ == "__main__":
                 count = 0
                 for sample in data[exponent]:
                     try:
-                        pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, math.ceil(math.log2(int(exponent))) + 1)
+                        pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, 1 if exponent == 0 else math.ceil(math.log2(int(exponent))) + 1)
                     except:
                         sample['correct'] = False
                         sample['pred'] = "Max depth reached"
