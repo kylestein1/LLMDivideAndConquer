@@ -73,6 +73,9 @@ if __name__ == "__main__":
     global cache
     
     for checkpoint in args.checkpoints:
+        print("*"*50)
+        print(f"CHECKPOINT: {checkpoint}")
+        
         model, tokenizer = init_model(os.path.join(args.lora_dir, checkpoint))
         
         cache = {}
