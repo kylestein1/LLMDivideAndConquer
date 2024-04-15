@@ -73,7 +73,7 @@ if __name__ == "__main__":
         
         model, tokenizer = init_model(os.path.join(args.lora_dir, checkpoint))
         
-        cahce = {}
+        cache = {}
 
         with open(f"exponentiation_by_squaring/exponentiation_{args.split}_{args.style}.json", 'r') as f:
             data = json.load(f)

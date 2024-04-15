@@ -102,7 +102,7 @@ if __name__ == "__main__":
                         pred = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
                     except:
                         data[i][j]['correct'] = False
-                        data[i][j]['pred_logs'] = "Max depth reached"
+                        data[i][j]['pred'] = "Max depth reached"
                         continue
 
                     correct = check_correct(parse_last_list(pred), data[i][j]['output'])
