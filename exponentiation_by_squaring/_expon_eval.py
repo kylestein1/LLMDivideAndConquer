@@ -40,6 +40,7 @@ def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
         exp_result = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
         output = output.replace(match, parse_last_num(exp_result), 1)
     output = generate(model, tokenizer, f"{output} = ", max_length)
+    print(output)
     cache[prompt] = output
     return output
 
@@ -95,7 +96,8 @@ if __name__ == "__main__":
                 for sample in data[exponent]:
                     try:
                         pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, 1 if exponent == 0 else math.ceil(math.log2(int(exponent))) + 1)
-                    except:
+                    except Exception as e:
+                        print('Error:', e)
                         sample['correct'] = False
                         sample['pred'] = "Max depth reached"
                         continue
