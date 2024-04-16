@@ -8,6 +8,7 @@ import argparse
 import json
 import math
 import os
+import time
 
 def init_model(lora_dir):
     model = AutoModelForCausalLM.from_pretrained('huggyllama/llama-7b',cache_dir='/scratch/kyle/LLMDivideAndConquer/cache', torch_dtype=torch.float16, device_map='auto')
@@ -85,31 +86,41 @@ if __name__ == "__main__":
         
         if args.style == "baseline" or args.style == "scratchpad":
             for i in data.keys():
+                times = []
                 count = 0
                 for j in range(len(data[i])):
+                    start_time = time.time()
                     pred = generate(model, tokenizer, f"{data[i][j]['input']}", 2048)
+                    end_time = time.time()
+                    times.append(end_time - start_time)
                     correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                     count += 1 if correct else 0
                     data[i][j]['correct'] = correct
                     data[i][j]['pred'] = " ".join(pred.split())
-                print(f"[LENGTH {i}] Num Correct: {count}")
+                print(f"[LENGTH {i}] Num Correct: {count} Avg Time: {sum(times)/len(times)}")
                 
         elif args.style == "recursive":
             for i in data.keys():
                 count = 0
+                times = []
                 for j in range(len(data[i])):
+                    
+                    start_time = time.time()
+                    
                     try:
                         pred = recursive_generate(model, tokenizer, f"{data[i][j]['input']}", 2048, math.ceil(math.log2(int(i))) + 1)
                     except:
                         data[i][j]['correct'] = False
                         data[i][j]['pred'] = "Max depth reached"
                         continue
-
+                    
+                    end_time = time.time()
+                    times.append(end_time - start_time)
                     correct = check_correct(parse_last_list(pred), data[i][j]['output'])
                     count += 1 if correct else 0
                     data[i][j]['correct'] = correct
                     data[i][j]['pred'] = " ".join(pred.split())
-                print(f"[LENGTH {i}] Num Correct: {count}")
+                print(f"[LENGTH {i}] Num Correct: {count} Avg Time: {sum(times)/len(times)}")
         
         with open(os.path.join(args.lora_dir, checkpoint, f"mergesort_{args.split}_{args.style}_pred.json"), 'w') as f:
             json.dump(data, f, indent=4)

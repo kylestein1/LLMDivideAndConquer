@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import re
+import time
 import math
 
 def init_model(lora_dir):
@@ -82,18 +83,24 @@ if __name__ == "__main__":
         if args.style == "baseline" or args.style == "scratchpad":
             for exponent in data.keys():
                 count = 0
+                times = []
                 for sample in data[exponent]:
+                    start_time = time.time()
                     pred = generate(model, tokenizer, sample['input'], max_length=2048)
+                    end_time = time.time()
+                    times.append(end_time - start_time)
                     correct = check_correct(parse_last_num(pred), sample['output'])
                     count += 1 if correct else 0
                     sample['correct'] = correct
                     sample['pred'] = " ".join(pred.split())
-                print(f"[EXPONENT {exponent}] Num Correct: {count}")
+                print(f"[EXPONENT {exponent}] Num Correct: {count} Avg Time: {sum(times)/len(times)}")
                 
         elif args.style == "recursive":
             for exponent in data.keys():
                 count = 0
+                times = []
                 for sample in data[exponent]:
+                    start_time = time.time()
                     try:
                         pred = recursive_generate(model, tokenizer, f"{sample['input']}", 2048, 1 if int(exponent) == 0 else math.ceil(math.log2(int(exponent))) + 1)
                     except Exception as e:
@@ -101,11 +108,13 @@ if __name__ == "__main__":
                         sample['correct'] = False
                         sample['pred'] = "Max depth reached"
                         continue
+                    end_time = time.time()
+                    times.append(end_time - start_time)
                     correct = check_correct(parse_last_num(pred), sample['output'])
                     count += 1 if correct else 0
                     sample['correct'] = correct
                     sample['pred'] = " ".join(pred.split())
-                print(f"[EXPONENT {exponent}] Num Correct: {count}")
+                print(f"[EXPONENT {exponent}] Num Correct: {count} Avg Time: {sum(times)/len(times)}")
                         
 
         with open(os.path.join(args.lora_dir, checkpoint, f"exponentiation_{args.split}_{args.style}_pred.json"), 'w') as f:
