@@ -36,12 +36,13 @@ def recursive_generate(model, tokenizer, prompt, max_length, max_depth):
     if prompt in cache:
         return cache[prompt]
     output = generate(model, tokenizer, prompt, max_length)
+    if '*' not in output:
+        return output
     exp_matches = re.findall(r'\d+\^\d+', output)
     for match in exp_matches[1:]:    
         exp_result = recursive_generate(model, tokenizer, f"{match} = ", max_length, max_depth-1)
         output = output.replace(match, parse_last_num(exp_result), 1)
     output = generate(model, tokenizer, f"{output} = ", max_length)
-    print(output)
     cache[prompt] = output
     return output
 
